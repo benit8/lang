@@ -1,0 +1,8 @@
+var cube = fn (n) => n * n
+
+var main = fn () {
+  var r = cube(2)
+  println("r = {}", r)
+}
+
+return main

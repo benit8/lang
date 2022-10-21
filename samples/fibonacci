@@ -1,0 +1,10 @@
+// 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89
+var fib = fn (n) => n < 2 ? n : fib(n - 1) + fib(n - 2)
+
+var main = fn () {
+  range(0, 10).each(fn (i) {
+    println("fib({}) = {}", i, fib(i))
+  })
+}
+
+return main

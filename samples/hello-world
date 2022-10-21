@@ -1,0 +1,4 @@
+return fn (args, env) {
+  println("Hello world! from {}, at {}", args.at(0), env.get("PWD"))
+  return 0
+}

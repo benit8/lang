@@ -1,0 +1,55 @@
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef uint64_t value_t;
+
+// IEEE 756 DOUBLE     S[Exponent-][Mantissa------------------------------------------]
+#define SIGN_BIT    (0b1000000000000000000000000000000000000000000000000000000000000000)
+#define EXPONENT    (0b0111111111110000000000000000000000000000000000000000000000000000)
+#define QNAN_BIT    (0b0000000000001000000000000000000000000000000000000000000000000000)
+#define TYPE_MASK   (0b0000000000000111000000000000000000000000000000000000000000000000)
+#define VALUE_MASK  (0b0000000000000000111111111111111111111111111111111111111111111111)
+
+#define NAN_MASK    (EXPONENT | QNAN_BIT)
+
+#define TYPE_NULL   (0b0000000000000001000000000000000000000000000000000000000000000000)
+#define TYPE_BOOL   (0b0000000000000010000000000000000000000000000000000000000000000000)
+#define TYPE_OBJECT (0b0000000000000011000000000000000000000000000000000000000000000000)
+// #define TYPE_4      (0b0000000000000100000000000000000000000000000000000000000000000000)
+// #define TYPE_5      (0b0000000000000101000000000000000000000000000000000000000000000000)
+// #define TYPE_6      (0b0000000000000110000000000000000000000000000000000000000000000000)
+// #define TYPE_7      (0b0000000000000111000000000000000000000000000000000000000000000000)
+
+#define VALUE_NULL  ((value_t)(NAN_MASK | TYPE_NULL))
+#define VALUE_FALSE ((value_t)(NAN_MASK | TYPE_BOOL))
+#define VALUE_TRUE  ((value_t)(NAN_MASK | TYPE_BOOL | 1))
+#define VALUE_BOOL(x)   ((x) ? VALUE_TRUE : VALUE_FALSE)
+#define VALUE_NUMBER(x) (number_to_value(x))
+#define VALUE_OBJECT(x) ((value_t)(NAN_MASK | TYPE_OBJECT | (uint64_t)(x)))
+
+#define IS_NULL(x)    ((x) == VALUE_NULL)
+#define IS_BOOL(x)    ((x) == VALUE_FALSE || (x) == VALUE_TRUE)
+#define IS_NUMBER(x)  (((x) & NAN_MASK) != NAN_MASK)
+#define IS_OBJECT(x)  (!IS_NUMBER(x) && ((x) & TYPE_MASK) == TYPE_OBJECT)
+
+#define AS_BOOL(x)    ((x) == VALUE_TRUE)
+#define AS_NUMBER(x)  (value_to_number(x))
+#define AS_OBJECT(x)  ((object_t*)((x) & VALUE_MASK))
+
+static inline value_t number_to_value(double n)
+{
+	union { double d; uint64_t u; } conv = { .d = n };
+	return conv.u;
+}
+
+static inline double value_to_number(value_t v)
+{
+	union { double d; uint64_t u; } conv = { .u = v };
+	return conv.d;
+}
+
+uint64_t value_hash(value_t value);
+bool value_equals(value_t a, value_t b);
+void value_dump(value_t value);
