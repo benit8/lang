@@ -1,12 +1,16 @@
 #include "vm.h"
 
-void vm_free(object_t* obj)
+void vm_free(vm_t* vm, object_t* obj)
 {
 	switch (obj->type) {
 		case OBJECT_ARRAY: free_array((array_t*)obj); break;
 		case OBJECT_CLASS: free_class((class_t*)obj); break;
 		case OBJECT_FUNCTION: free_function((function_t*)obj); break;
-		case OBJECT_STRING: free_string((string_t*)obj); break;
+		case OBJECT_STRING: {
+			string_t* s = (string_t*)obj;
+			vm_string_pool_remove(&vm->string_pool, s);
+			free_string(s);
+		} break;
 		case OBJECT_TABLE: free_table((table_t*)obj); break;
 		default: break;
 	}
@@ -71,7 +75,7 @@ unsigned vm_gc_collect(vm_t* vm)
 		cur->gc_bit = 1;
 	}
 
-	// Reset root objects
+	// Un-mark root objects
 	for (size_t i = 0; i < vm->gc_roots.size; ++i) {
 		object_t** obj = buffer_at(&vm->gc_roots, i);
 		sweep(*obj);
@@ -82,7 +86,7 @@ unsigned vm_gc_collect(vm_t* vm)
 	for (object_t** cur = &vm->heap; *cur != NULL; ) {
 		if ((*cur)->gc_bit == 1) {
 			object_t* next = (*cur)->next;
-			vm_free(*cur);
+			vm_free(vm, *cur);
 			*cur = next;
 			collected++;
 		} else {

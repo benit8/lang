@@ -71,6 +71,7 @@ typedef struct string {
 string_t* new_string(vm_t* vm, const char* str);
 string_t* new_string_length(vm_t* vm, const char* str, size_t length);
 void free_string(string_t* string);
+bool string_compare(string_t* a, string_t* b);
 
 // -----------------------------------------------------------------------------
 
@@ -104,8 +105,6 @@ typedef struct table_pair {
 	value_t key;
 	value_t value;
 } table_pair_t;
-
-#define TABLE_CAPACITY 16
 
 typedef struct table {
 	object_t header;

@@ -13,7 +13,8 @@ SRCS = src/buffer.c \
        src/std/io.c \
        src/std/table.c \
        src/value.c \
-       src/vm.c
+       src/vm.c \
+       src/vm/string_pool.c
 
 OBJS = $(SRCS:.c=.o)
 

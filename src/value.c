@@ -15,8 +15,9 @@ static uint64_t hash64(uint64_t n)
 
 uint64_t value_hash(value_t value)
 {
-	if (IS_STRING(value))
-		return ((string_t*)AS_OBJECT(value))->hash;
+	if (IS_STRING(value)) {
+		return AS_STRING(value)->hash;
+	}
 	return hash64(value);
 }
 
@@ -36,7 +37,7 @@ bool value_equals(value_t a, value_t b)
 			return false;
 		switch (obja->type) {
 		case OBJECT_STRING:
-			return strcmp(((string_t*)obja)->data, ((string_t*)objb)->data) == 0;
+			return string_compare(AS_STRING(a), AS_STRING(b));
 		default:
 			return obja == objb;
 		}

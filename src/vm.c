@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include "vm.h"
 #include "std.h"
 
@@ -33,6 +34,7 @@ vm_t* vm_open(char** environment, error_handler_t error)
 	vm->gc_roots = buffer_new(sizeof(object_t*));
 	vm->global = new_table(vm);
 	vm_gc_keep_alive(vm, (object_t*)vm->global);
+	vm_init_string_pool(&vm->string_pool, 32);
 
 	vm->stack = buffer_new(sizeof(value_t));
 
@@ -48,6 +50,7 @@ void vm_destroy(vm_t* vm)
 	vm->heap = NULL;
 
 	buffer_free(&vm->stack);
+	vm_free_string_pool(&vm->string_pool);
 
 	FREE(vm);
 }

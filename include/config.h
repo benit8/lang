@@ -12,3 +12,9 @@
 #ifndef FREE
 	#define FREE(ptr) free(ptr)
 #endif
+
+#define STRING_POOL_CAPACITY 32
+
+#define TABLE_CAPACITY 16
+
+#define HASH_LOAD_FACTOR 75

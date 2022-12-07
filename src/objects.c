@@ -39,17 +39,6 @@ void free_array(array_t* array)
 
 // String ---------------------------------------------------------------------
 
-static uint32_t hash_string(const char* string, size_t length)
-{
-	// FNV-1a hash. See: http://www.isthe.com/chongo/tech/comp/fnv/
-	uint32_t hash = 2166136261u;
-	for (uint32_t i = 0; i < length; i++) {
-		hash ^= string[i];
-		hash *= 16777619;
-	}
-	return hash;
-}
-
 string_t* new_string(vm_t* vm, const char* str)
 {
 	return new_string_length(vm, str, strlen(str));
@@ -57,18 +46,30 @@ string_t* new_string(vm_t* vm, const char* str)
 
 string_t* new_string_length(vm_t* vm, const char* str, size_t length)
 {
-	string_t* string = ALLOC(sizeof(string_t) + length + 1);
-	init_header(vm, &string->header, OBJECT_STRING, vm->string_class);
-	memcpy(string->data, str, length);
-	string->data[length] = 0;
-	string->length = length;
-	string->hash = hash_string(str, length);
+	string_t** bucket = vm_lookup_string_pool(&vm->string_pool, str, length);
+	assert(bucket != NULL);
+
+	string_t* string = *bucket;
+
+	if (string->length == 0) {
+		// String was just allocated by the pool
+		init_header(vm, &string->header, OBJECT_STRING, vm->string_class);
+		memcpy(string->data, str, length);
+		string->data[length] = 0;
+		string->length = length;
+	}
+
 	return string;
 }
 
 void free_string(string_t* string)
 {
 	FREE(string);
+}
+
+bool string_compare(string_t* a, string_t* b)
+{
+	return strncmp(a->data, b->data, a->length < b->length ? a->length : b->length) == 0;
 }
 
 // Function --------------------------------------------------------------------
