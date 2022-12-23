@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include "config.h"
 
-#define buffer_foreach(b, t, it) for (t* it = &b->data; it != b->data + (b->size * b->element_size); ++it)
+#define buffer_foreach(b, t, it) for (t* it = (b).data; it != (b).data + ((b).size * (b).element_size); ++it)
 
 typedef struct buffer {
 	void* data;

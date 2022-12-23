@@ -39,27 +39,29 @@ static void sweep(object_t* obj)
 	switch (obj->type) {
 	case OBJECT_ARRAY: {
 		array_t* array = (array_t*)obj;
-		for (size_t i = 0; i < array->values.size; ++i)
-			sweep_value(*(value_t*)buffer_at(&array->values, i));
+		buffer_foreach(array->values, value_t, it) {
+			sweep_value(*it);
+		}
 	} break;
 	case OBJECT_CLASS: {
 		class_t* class = (class_t*)obj;
-		for (size_t i = 0; i < class->constants.size; ++i)
-			sweep_value(*(value_t*)buffer_at(&class->constants, i));
+		buffer_foreach(class->constants, value_t, it) {
+			sweep_value(*it);
+		}
 		sweep((object_t*)class->properties);
 	} break;
 	case OBJECT_FUNCTION: {
 		function_t* fn = (function_t*)obj;
-		for (size_t i = 0; i < fn->compiled.constants.size; ++i)
-			sweep_value(*(value_t*)buffer_at(&fn->compiled.constants, i));
+		buffer_foreach(fn->compiled.constants, value_t, it) {
+			sweep_value(*it);
+		}
 	} break;
 	case OBJECT_TABLE: {
 		table_t* table = (table_t*)obj;
 		for (size_t i = 0; i < TABLE_CAPACITY; ++i) {
-			for (size_t j = 0; j < table->buckets[i].size; ++j) {
-				table_pair_t* p = buffer_at(&table->buckets[i], j);
-				sweep_value(p->key);
-				sweep_value(p->value);
+			buffer_foreach(table->buckets[i], table_pair_t, pair) {
+				sweep_value(pair->key);
+				sweep_value(pair->value);
 			}
 		}
 	} break;
@@ -76,8 +78,7 @@ unsigned vm_gc_collect(vm_t* vm)
 	}
 
 	// Un-mark root objects
-	for (size_t i = 0; i < vm->gc_roots.size; ++i) {
-		object_t** obj = buffer_at(&vm->gc_roots, i);
+	buffer_foreach(vm->gc_roots, object_t*, obj) {
 		sweep(*obj);
 	}
 

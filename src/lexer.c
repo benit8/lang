@@ -354,8 +354,7 @@ void lexer_free(lexer_t* lexer)
 	lexer->source = NULL;
 	lexer->module = NULL;
 
-	for (size_t i = 0; i < lexer->identifiers.size; ++i) {
-		identifier_t* id = buffer_at(&lexer->identifiers, i);
+	buffer_foreach(lexer->identifiers, identifier_t, id) {
 		FREE(id->name);
 	}
 

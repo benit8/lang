@@ -88,8 +88,9 @@ static void compile(vm_t* vm, function_t* fn, ast_node_t* node, scope_t* scope)
 		emit(fn, binary_op(node->binary.operator));
 		break;
 	case AST_BLOCK:
-		for (size_t i = 0; i < node->block.body.size; ++i)
-			compile(vm, fn, *(ast_node_t**)buffer_at(&node->block.body, i), node->block.scope);
+		buffer_foreach(node->block.body, ast_node_t*, child) {
+			compile(vm, fn, *child, node->block.scope);
+		}
 		if (fn->compiled.code.size == 0 || ((op_t*)buffer_at(&fn->compiled.code, fn->compiled.code.size - 1))->op != OP_RETURN)
 			emit(fn, OP_RETURN);
 		break;

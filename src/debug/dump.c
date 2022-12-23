@@ -39,8 +39,8 @@ static void dump_object(object_t* obj, int indent)
 	case OBJECT_ARRAY: {
 		array_t* array = (array_t*) obj;
 		iprintf(indent, "Array (%zu) {\n", array->values.size);
-		for (size_t i = 0; i < array->values.size; ++i)
-			dump(*(value_t*)buffer_at(&array->values, i), indent + 1);
+		buffer_foreach(array->values, value_t, it)
+			dump(*it, indent + 1);
 		iprintf(indent, "}\n");
 	} break;
 	case OBJECT_CLASS: {} break;
@@ -81,8 +81,7 @@ static void dump_object(object_t* obj, int indent)
 		table_t* table = (table_t*) obj;
 		iprintf(indent, "Table {\n");
 		for (size_t i = 0; i < TABLE_CAPACITY; ++i) {
-			for (size_t j = 0; j < table->buckets[i].size; ++j) {
-				table_pair_t* p = buffer_at(&table->buckets[i], j);
+			buffer_foreach(table->buckets[i], table_pair_t, p) {
 				dump(p->key, indent + 1);
 				iprintf(indent + 2, "=> ");
 				dump(p->value, 0);

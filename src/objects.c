@@ -117,8 +117,7 @@ static table_pair_t* get_pair(table_t* table, value_t key, bool should_allocate)
 		*bucket = buffer_new(sizeof(table_pair_t));
 	}
 
-	for (size_t i = 0; i < bucket->size; ++i) {
-		table_pair_t* p = buffer_at(bucket, i);
+	buffer_foreach(*bucket, table_pair_t, p) {
 		if (value_equals(p->key, key))
 			return p;
 	}

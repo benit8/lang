@@ -20,8 +20,8 @@ static ast_node_t* make_block(parser_t* p, buffer_t* parameters)
 	node->block.scope->upvalues = buffer_new(sizeof(token_t));
 	p->scope = node->block.scope;
 	if (parameters) {
-		for (size_t i = 0; i < parameters->size; ++i) {
-			scope_add_local(node->block.scope, buffer_at(parameters, i));
+		buffer_foreach(*parameters, token_t, t) {
+			scope_add_local(node->block.scope, t);
 		}
 	}
 	return node;

@@ -19,8 +19,8 @@ static int8_t array_each(vm_t* vm, uint8_t argc)
 	value_t callback = vm_pop(vm);
 	assert(IS_FUNCTION(callback));
 
-	for (size_t i = 0; i < this->values.size; ++i) {
-		vm_push(vm, *(value_t*)buffer_at(&this->values, i));
+	buffer_foreach(this->values, value_t, it) {
+		vm_push(vm, *it);
 		vm_interpret(vm, callback, 1);
 	}
 	return 0;

@@ -1,5 +1,15 @@
 # lang
 
+Toy and experiment programming language.
+
+```
+return fn (args, env) {
+  println("Hello world! from {}, at {}", args.at(0), env.get("PWD"))
+  return 0
+}
+```
+For now you must return your `main` function from your entrypoint.
+
 ## Build
 
 ```sh
@@ -30,6 +40,7 @@ make
 - std lib
   - strings
 
+- User-defined classes
 - TypeChecker
 - Modules/namespaces
 - Fibers

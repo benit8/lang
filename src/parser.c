@@ -30,8 +30,8 @@ static void free_node(ast_node_t* node)
 		buffer_free(&node->block.scope->upvalues);
 		buffer_free(&node->block.scope->locals);
 		FREE(node->block.scope);
-		for (size_t i = 0; i < node->block.body.size; ++i)
-			free_node(*((ast_node_t**)buffer_at(&node->block.body, i)));
+		buffer_foreach(node->block.body, ast_node_t*, n)
+			free_node(*n);
 		buffer_free(&node->block.body);
 		break;
 	case AST_BRANCH:
@@ -41,8 +41,8 @@ static void free_node(ast_node_t* node)
 		break;
 	case AST_CALL:
 		free_node(node->call.callee);
-		for (size_t i = 0; i < node->call.arguments.size; ++i)
-			free_node(*((ast_node_t**)buffer_at(&node->call.arguments, i)));
+		buffer_foreach(node->call.arguments, ast_node_t*, n)
+			free_node(*n);
 		buffer_free(&node->call.arguments);
 		break;
 	case AST_FUNCTION:
@@ -74,8 +74,8 @@ static inline bool token_equals(token_t* a, token_t* b) {
 
 static size_t scope_add_local(scope_t* scope, token_t* t)
 {
-	for (size_t i = 0; i < scope->locals.size; ++i) {
-		if (token_equals(buffer_at(&scope->locals, i), t))
+	buffer_foreach(scope->locals, token_t, it) {
+		if (token_equals(it, t))
 			return NOT_FOUND;
 	}
 	buffer_push(&scope->locals, t);
@@ -330,8 +330,8 @@ void parser_dump_node(parser_t* parser, ast_node_t* node, unsigned indent)
 			printf("%s%s", i > 0 ? ", " : "", id->name);
 		}
 		printf("]\n");
-		for (size_t i = 0; i < node->block.body.size; ++i) {
-			parser_dump_node(parser, *((ast_node_t**)buffer_at(&node->block.body, i)), indent + 1);
+		buffer_foreach(node->block.body, ast_node_t*, n) {
+			parser_dump_node(parser, *n, indent + 1);
 		}
 		break;
 	case AST_BRANCH:
@@ -343,8 +343,9 @@ void parser_dump_node(parser_t* parser, ast_node_t* node, unsigned indent)
 	case AST_CALL:
 		printf("CALL\n");
 		parser_dump_node(parser, node->call.callee, indent + 1);
-		for (size_t i = 0; i < node->call.arguments.size; ++i)
-			parser_dump_node(parser, *((ast_node_t**)buffer_at(&node->call.arguments, i)), indent + 1);
+		buffer_foreach(node->call.arguments, ast_node_t*, n) {
+			parser_dump_node(parser, *n, indent + 1);
+		}
 		break;
 	case AST_FUNCTION:
 		printf("FUNCTION (");
